@@ -14,6 +14,18 @@ load_figure_template(["bootstrap", "darkly"])
 
 # ---- data ---- #
 dados = pd.read_csv(f'{pathApp}data_stock.csv')
+# using mongodb Atlas Sandbox
+# def mongoConecta(url, database, collection):
+#     #print(pymongo.version)
+#     mongo_url = url
+#     cliente = pymongo.MongoClient(mongo_url)
+#     DB = cliente[database]
+#     DC = DB[collection]
+#     return DC
+# db = mongoConecta(url="mongodb+srv://MYUser:MYPassword@URLsandbox.XYZ14.mongodb.net/XXXXXXX", 
+#                       database='MyDatabase', collection='MyDatacollection')
+# dados = pd.DataFrame(list(db.find({}, { '_id': 0 })))
+
 ld = str(dados.date.sort_values(ascending=False).unique()[0]).split(' ')[0]
 dados_high = dados[dados.indicator.isin(['high'])]
 symbols = dados_high.symbol.sort_values().unique().tolist()
