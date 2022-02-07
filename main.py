@@ -217,9 +217,6 @@ def update_result1(timer):
     return results
 
 
-
-
-
 outputs3 = [Output(f'low-price-{i}', 'children') for i in symbols]
 @app.callback(
     outputs3,
