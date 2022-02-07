@@ -8,11 +8,10 @@ import plotly.express as px
 import plotly.graph_objects as go
 
 
-# ---- setup ---- #
+# 1 ---- setup ---- #
 pathApp = './'
 load_figure_template(["bootstrap", "darkly"])
 
-# ---- data ---- #
 # if source is csv file
 # dados = pd.read_csv(f'{pathApp}data_stock.csv')
 
@@ -31,7 +30,7 @@ ld = str(dados.date.sort_values(ascending=False).unique()[0]).split(' ')[0]
 dados_high = dados[dados.indicator.isin(['high'])]
 symbols = dados_high.symbol.sort_values().unique().tolist()
 
-# ---- container builder ---- #
+# 2 ---- container builder ---- #
 elementos = [
     dbc.Row([
         dbc.Col([
@@ -104,7 +103,7 @@ for symbol in symbols:
                         dbc.Col([
                             dbc.Label(id=f'high-price-{symbol}', children={},
                                       className="mt-2 p-1"),
-                        ], width={'size': 4, 'offset': 2})
+                        ], width={'size': 5, 'offset': 2})
                     ], justify="between"),
                 ])
             ], style={'witdh': '24rem'}, className='mt-3')
@@ -117,7 +116,7 @@ if len(row) < 4:
 elementos.append(dcc.Interval(id='update', n_intervals=0, interval=1000 * 25))
 elementos.append(html.Div(id="blank_output"))
 
-# ---- layout ---- #
+# 3---- layout ---- #
 app = dash.Dash('meuApp', external_stylesheets=[dbc.themes.BOOTSTRAP, dbc.icons.FONT_AWESOME],
                 meta_tags=[{'name': 'viewport', 
                             'content': 'width=device-width, initial-scale=1.0'}])
@@ -125,7 +124,7 @@ server = app.server
 app.title = 'Italo - Example Dashboard - Stock Finance'
 app.layout = dbc.Container(elementos, fluid=True)
 
-# ---- callbacks ---- #
+# 4---- callbacks ---- #
 app.clientside_callback(
     """
     function(themeToggle) {
@@ -230,7 +229,7 @@ def funcao(timer):
     rate = []
     for i in symbols:
         r = dados[(dados.symbol == i) & (dados.indicator.isin(['low']))]['rate'].min()
-        rate.append(f"{r:.2f}")
+        rate.append(f"USD {r:.2f}")
     return rate
 
 
@@ -243,7 +242,7 @@ def funcao(timer):
     rate = []
     for i in symbols:
         r = dados[(dados.symbol == i) & (dados.indicator.isin(['low']))]['rate'].max()
-        rate.append(f"{r:.2f}")
+        rate.append(f"USD {r:.2f}")
     return rate
 
 
