@@ -13,18 +13,19 @@ pathApp = './'
 load_figure_template(["bootstrap", "darkly"])
 
 # ---- data ---- #
-dados = pd.read_csv(f'{pathApp}data_stock.csv')
+# if source is csv file
+# dados = pd.read_csv(f'{pathApp}data_stock.csv')
+
 # using mongodb Atlas Sandbox
-# def mongoConecta(url, database, collection):
-#     #print(pymongo.version)
-#     mongo_url = url
-#     cliente = pymongo.MongoClient(mongo_url)
-#     DB = cliente[database]
-#     DC = DB[collection]
-#     return DC
-# db = mongoConecta(url="mongodb+srv://MYUser:MYPassword@URLsandbox.XYZ14.mongodb.net/XXXXXXX", 
-#                       database='MyDatabase', collection='MyDatacollection')
-# dados = pd.DataFrame(list(db.find({}, { '_id': 0 })))
+def mongoConecta(url, database, collection):
+    mongo_url = url
+    cliente = pymongo.MongoClient(mongo_url)
+    DB = cliente[database]
+    DC = DB[collection]
+    return DC
+db = mongoConecta(url="mongodb+srv://MYUser:MYPassword@URLsandbox.XYZ14.mongodb.net/XXXXXXX", 
+                      database='MyDatabase', collection='MyDatacollection')
+dados = pd.DataFrame(list(db.find({}, { '_id': 0 })))
 
 ld = str(dados.date.sort_values(ascending=False).unique()[0]).split(' ')[0]
 dados_high = dados[dados.indicator.isin(['high'])]
@@ -40,8 +41,11 @@ elementos = [
             html.H1(f"ISM - Italo Stock Market Dashboard"),
             dbc.Row([
                 dbc.Col([
-                    html.P(f"stock indexes: {ld}")
-                ], width=11),
+                    html.P(f"Date reference:")
+                ], width=1),
+                dbc.Col([
+                    html.H6(f"{ld}")
+                ], width=8),
                 dbc.Col([
                     html.Div(
                         [
@@ -62,22 +66,19 @@ for symbol in symbols:
     symbol_coluna = dbc.Col(
         [
             dbc.Card([
-                dbc.CardImg(
-                    src=f'/assets/{symbol}.png',
-                    top=True,
-                    style={'width': '3rem'},
-                    className='ml-4 bg-white'
-                ),
+                
                 dbc.CardBody([
+                    
                     dbc.Row([
                         dbc.Col([
-                            html.P('Change (1day)', className='ml-3')
-                        ], width={'size': 5, 'offset': 1}),
+                            html.Img(src=f'/assets/{symbol}.png', style={'width': '3rem'}, className='ml-4 bg-white')
+                        ], width=2),
                         dbc.Col([
-                            dcc.Graph(id=f'indicator-graph-{symbol}', figure={},
-                                      config={'displayModeBar': False})
-                        ], width={'size': 3, 'offset': 2}),
-
+                            html.H4(f"{symbol} ")
+                        ], width=3),
+                        dbc.Col([
+                            html.Span(children="xxxx", id=f"icone-{symbol}", className="")
+                        ])
                     ]),
                     dbc.Row([
                         dbc.Col([
@@ -113,7 +114,7 @@ for symbol in symbols:
         elementos.append(dbc.Row(row, justify='center'))
 if len(row) < 4:
     elementos.append(dbc.Row(row, justify='center'))
-elementos.append(dcc.Interval(id='update', n_intervals=0, interval=1000 * 5))
+elementos.append(dcc.Interval(id='update', n_intervals=0, interval=1000 * 25))
 elementos.append(html.Div(id="blank_output"))
 
 # ---- layout ---- #
@@ -165,6 +166,7 @@ def update_graph(timer):
                                                     showgrid=False,
                                                     showticklabels=False
                                                 ))
+        
 
         day_start = dff_rv[dff_rv['date'] == dff_rv['date'].min()]['rate'].values[0]
         day_end = dff_rv[dff_rv['date'] == dff_rv['date'].max()]['rate'].values[0]
@@ -178,42 +180,48 @@ def update_graph(timer):
     return results
 
 
-outputs2 = [Output(f'indicator-graph-{i}', 'figure') for i in symbols]
-
-
+outputs21 = [Output(f'icone-{i}', 'className') for i in symbols]  
 @app.callback(
-    outputs2,
+    outputs21,
     Input('update', 'n_intervals')
 )
-def update_graph(timer):
+def update_result1(timer):
     results = []
     for symbol in symbols:
         dff = dados_high[dados_high.symbol == symbol]
         dff_rv = dff.iloc[::-1]
         day_start = dff_rv[dff_rv['date'] == dff_rv['date'].min()]['rate'].values[0]
         day_end = dff_rv[dff_rv['date'] == dff_rv['date'].max()]['rate'].values[0]
-
-        fig = go.Figure(go.Indicator(
-            mode='delta',
-            value=day_end,
-            delta={'reference': day_start, 'relative': True, 'valueformat': '.2%'}
-        ))
-        fig.update_traces(delta_font={'size': 14})
-        fig.update_layout(height=30, width=70,
-                          paper_bgcolor='rgba(0,0,0,0)',
-                          plot_bgcolor='rgba(0,0,0,0)',)
-
+        
         if day_end >= day_start:
-            fig.update_traces(delta_increasing_color='green')
+            results.append("fa fa-arrow-up text-success")
         elif day_end < day_start:
-            fig.update_traces(delta_decreasing_color='red')
-        results.append(fig)
+            results.append("fa fa-arrow-down text-danger")  
     return results
 
 
+outputs22 = [Output(f'icone-{i}', 'children') for i in symbols]  
+@app.callback(
+    outputs22,
+    Input('update', 'n_intervals')
+)
+def update_result1(timer):
+    results = []
+    for symbol in symbols:
+        dff = dados_high[dados_high.symbol == symbol]
+        dff_rv = dff.iloc[::-1]
+        day_start = dff_rv[dff_rv['date'] == dff_rv['date'].min()]['rate'].values[0]
+        day_end = dff_rv[dff_rv['date'] == dff_rv['date'].max()]['rate'].values[0]
+        value = 100-(day_start*100/day_end)
+        results.append(f"{value:.2f}%")
+        
+    return results
+
+
+
+
+
 outputs3 = [Output(f'low-price-{i}', 'children') for i in symbols]
-
-
 @app.callback(
     outputs3,
     Input('update', 'n_intervals')
@@ -221,14 +229,12 @@ outputs3 = [Output(f'low-price-{i}', 'children') for i in symbols]
 def funcao(timer):
     rate = []
     for i in symbols:
-        r = dados[(dados.symbol == i) & (dados.indicator.isin(['low']))]['rate'].head(1).to_list()[0]
-        rate.append(r)
+        r = dados[(dados.symbol == i) & (dados.indicator.isin(['low']))]['rate'].min()
+        rate.append(f"{r:.2f}")
     return rate
 
 
 outputs4 = [Output(f'high-price-{i}', 'children') for i in symbols]
-
-
 @app.callback(
     outputs4,
     Input('update', 'n_intervals')
@@ -236,10 +242,10 @@ outputs4 = [Output(f'high-price-{i}', 'children') for i in symbols]
 def funcao(timer):
     rate = []
     for i in symbols:
-        r = dados[(dados.symbol == i) & (dados.indicator.isin(['high']))]['rate'].head(1).to_list()[0]
-        rate.append(r)
+        r = dados[(dados.symbol == i) & (dados.indicator.isin(['low']))]['rate'].max()
+        rate.append(f"{r:.2f}")
     return rate
 
 
 if __name__ == '__main__':
-    app.run_server(debug=False, port=4321)
+    app.run_server(debug=True, port=4321)
