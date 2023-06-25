@@ -6,6 +6,7 @@ from dash_bootstrap_templates import load_figure_template
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+import socket
 
 
 # 1 ---- setup ---- #
@@ -40,10 +41,10 @@ elementos = [
             html.H1(f"ISM - Italo Stock Market Dashboard"),
             dbc.Row([
                 dbc.Col([
-                    html.P(f"Date reference:")
+                    html.P(f"host:")
                 ], width=1),
                 dbc.Col([
-                    html.H6(f"{ld}")
+                    html.H6(f"{h_name}")
                 ], width=8),
                 dbc.Col([
                     html.Div(
@@ -244,4 +245,6 @@ def funcao(timer):
 
 
 if __name__ == '__main__':
+    h_name = socket.gethostname()
+    IP_addres = socket.gethostbyname(h_name)
     app.run_server(debug=False, port=80, host='0.0.0.0')
