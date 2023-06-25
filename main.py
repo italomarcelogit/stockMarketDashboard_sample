@@ -32,6 +32,8 @@ dados_high = dados[dados.indicator.isin(['high'])]
 symbols = dados_high.symbol.sort_values().unique().tolist()
 
 # 2 ---- container builder ---- #
+h_name = socket.gethostname()
+IP_addres = socket.gethostbyname(h_name)
 elementos = [
     dbc.Row([
         dbc.Col([
@@ -245,6 +247,4 @@ def funcao(timer):
 
 
 if __name__ == '__main__':
-    h_name = socket.gethostname()
-    IP_addres = socket.gethostbyname(h_name)
     app.run_server(debug=False, port=80, host='0.0.0.0')
