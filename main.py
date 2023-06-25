@@ -13,18 +13,18 @@ pathApp = './'
 load_figure_template(["bootstrap", "darkly"])
 
 # if source is csv file
-# dados = pd.read_csv(f'{pathApp}data_stock.csv')
+dados = pd.read_csv(f'{pathApp}data_stock.csv')
 
 # using mongodb Atlas Sandbox
-def mongoConecta(url, database, collection):
-    mongo_url = url
-    cliente = pymongo.MongoClient(mongo_url)
-    DB = cliente[database]
-    DC = DB[collection]
-    return DC
-db = mongoConecta(url="mongodb+srv://MYUser:MYPassword@URLsandbox.XYZ14.mongodb.net/XXXXXXX", 
-                      database='MyDatabase', collection='MyDatacollection')
-dados = pd.DataFrame(list(db.find({}, { '_id': 0 })))
+# def mongoConecta(url, database, collection):
+#     mongo_url = url
+#     cliente = pymongo.MongoClient(mongo_url)
+#     DB = cliente[database]
+#     DC = DB[collection]
+#     return DC
+# db = mongoConecta(url="mongodb+srv://MYUser:MYPassword@URLsandbox.XYZ14.mongodb.net/XXXXXXX", 
+#                       database='MyDatabase', collection='MyDatacollection')
+# dados = pd.DataFrame(list(db.find({}, { '_id': 0 })))
 
 ld = str(dados.date.sort_values(ascending=False).unique()[0]).split(' ')[0]
 dados_high = dados[dados.indicator.isin(['high'])]
@@ -244,4 +244,4 @@ def funcao(timer):
 
 
 if __name__ == '__main__':
-    app.run_server(debug=True, port=4321)
+    app.run_server(debug=True, port=80)
